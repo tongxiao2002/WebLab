@@ -3,3 +3,10 @@
 
 # Ada Library Information
 *.ali
+
+# data and outputs
+lab1/data/
+lab1/output/
+
+# IDE config
+.vscode/
