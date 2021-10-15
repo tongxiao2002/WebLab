@@ -12,15 +12,20 @@ def yield_text(filename: str):
     with open(filename, "r") as fin:
         for line in fin:
             json_data = json.loads(line)
-            yield json_data["id"], json_data["title"] + " " + json_data["text"]
+            yield json_data["uuid"], json_data["id"], json_data["title"] + " " + json_data["text"]
 
 
 def build_one_file(filename: str, stopwords: list, offset_idx: int):
     invert_indices = {}
+    info_idices = {}    #recode the len of text 
+    uuid_indices = {}   #recode relationship of id and uuid 
+
     porter_stemmer = nltk.stem.PorterStemmer()
-    for id, text in tqdm.tqdm(yield_text(filename), position=offset_idx):
+
+    for uuid, id, text in tqdm.tqdm(yield_text(filename), position=offset_idx):
         word_list = list(gensim.utils.tokenize(text, lowercase=True, deacc=True))   # tokenize
         del_idx = []
+
         for idx, word in enumerate(word_list):  # delete stopwords and normalize
             if word in stopwords:
                 del_idx.append(idx)
@@ -29,25 +34,26 @@ def build_one_file(filename: str, stopwords: list, offset_idx: int):
         for idx in reversed(del_idx):
             word_list.pop(idx)
 
+        info_idices[id] = len(word_list)
         for word in word_list:  # build indices
             if word not in invert_indices.keys():
-                # invert_indices[word] = {id: {"c": 1, "t": len(text)}}     # tf-idf 值先存下 text 长度
-                invert_indices[word] = {id: [1, len(text)]}
+                invert_indices[word] = {id:1}
             else:
-                # if id not in invert_indices[word].keys():
-                    # invert_indices[word][id] = {"c": 0, "t": len(text)}
-                # invert_indices[word][id]["c"] += 1
+
                 if id not in invert_indices[word].keys():
-                    invert_indices[word][id] = [0, len(text)]
-                invert_indices[word][id][0] += 1
+                    invert_indices[word][id] = 0
+                invert_indices[word][id] += 1
     # q.put(invert_indices)
+    invert_indices['INFO'] = info_idices
+    invert_indices['UUID'] = uuid_indices
+
     return invert_indices
 
 
 def build(infiles: list, stopfile: str, outfile: str):
     N = 306242      # 新闻总条数
     stopwords = []
-    with open(stopfile, "r") as fin:
+    with open(stopfile, "r") as fin:        ##get stopwords 
         for line in fin:
             stopwords.append(line.strip())
 
@@ -64,13 +70,19 @@ def build(infiles: list, stopfile: str, outfile: str):
         for k, v in indices.items():
             if k not in invert_indices.keys():
                 invert_indices[k] = v
+            elif (k == 'INFO'):
+                invert_indices['INFO'].update(v)
+            elif (k == 'UUID'):
+                invert_indices['UUID'].update(v)
             else:
                 for id, count in v.items():
                     invert_indices[k][id] = count
 
     for word, id_list in invert_indices.items():      # compute tf-idf
         for id, v in id_list.items():
-            invert_indices[word][id] = float(v[0] / v[1]) *\
+            word_len = invert_indices["INFO"][id]
+
+            invert_indices[word][id] = float(v / word_len ) *\
                                        math.log(float(N / (len(id_list) + 1)))
 
     # save to outfile
@@ -80,7 +92,8 @@ def build(infiles: list, stopfile: str, outfile: str):
 
     
 if __name__ == "__main__":
-    files = ["data/" + "2018_0" + str(idx) + ".json" for idx in range(1, 6)]
-    stopfile = "data/stopwords.txt"
-    outfile = "output/invert_indices.dict"
+    #files = ["../../../data/" + "2018_0" + str(idx) + ".json" for idx in range(1, 6)]
+    files = ["D://WorkPlace/data/2018.json"]
+    stopfile = "D://WorkPlace/data/stopwords.txt"
+    outfile = "D://WorkPlace/data/output/invert_indices.dict"
     build(files, stopfile, outfile)

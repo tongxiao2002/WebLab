@@ -1,4 +1,6 @@
 from enum import Enum
+import pickle
+from re import A
 
 class TokenType(Enum):
     NONE = 0
@@ -118,20 +120,79 @@ def build_grammar_tree(text: str):
     return root
 
 
-def print_tree(root: Tree):
+def print_tree(root: Tree):     #
     if len(root.children) == 0:
-        print(root.token.value, end=" ")
+        print(root.token.value, end=" \n")
     elif len(root.children) == 1:
-        print(root.token.value, end=" ")
         print_tree(root.children[0])
+        print(root.token.value, end=" \n")      
     elif len(root.children) == 2:
-        print_tree(root.children[0])
-        print(root.token.value, end=" ")
+        print_tree(root.children[0])        
         print_tree(root.children[1])
+        print(root.token.value, end=" \n")
     else:
         raise ValueError
 
+def tree_to_stack(root: Tree):
+    if root == None:
+        return False
+    stack1 = []
+    stack2 = []
+    stack1.append(root)
+    while stack1:
+        node = stack1.pop()
+        if(len(node.children)) == 1:
+            stack1.append(node.children[0])
+        elif (len(node.children)) == 2:
+            stack1.append(node.children[0])
+            stack1.append(node.children[1])
+            
+        stack2.append(node)
+      
+    stack2.reverse()
+    return stack2
+
+def tree_search(indicesfile:str):
+    #text = input()
+    #text = 'NOT (("abdc" OR "bdef") AND ((NOT ("xt")) OR "xxxt"))'
+    text = '"card" OR "member"'
+    root = build_grammar_tree(text)
+    
+    pickle_file = open(indicesfile, 'rb')
+    inverse_indices = pickle.load(pickle_file)
+
+    id_list = list(inverse_indices["UUID"].keys())  #for not option
+
+    stack = tree_to_stack(root)
+    fullset = set(inverse_indices.keys())
+    setstack = []
+
+    for node in stack:
+        if node.token.type == TokenType.WORD:     #TokenType.WORD:
+            if node.token.value in inverse_indices.keys():
+                set1 = set(inverse_indices[node.token.value].keys())
+            else:
+                set1 = set()
+            setstack.append(set1)
+        elif node.token.type == TokenType.NOT:     #:
+            setstack[-1] = fullset.difference(setstack[-1])
+        elif node.token.type == TokenType.AND:       #:
+            setstack[-2] = setstack[-2] & setstack[-1] 
+            setstack.pop()
+        elif node.token.type == TokenType.OR:       #:
+            setstack[-2] = setstack[-2] | setstack[-1] 
+            setstack.pop()
+        #print(len(setstack))
+
+    return setstack[0]
+
 if __name__ == "__main__":
-    test_case = 'NOT (("abdc" OR "bdef") AND ((NOT ("xt")) OR "xxxt"))'
-    root = build_grammar_tree(test_case)
-    print_tree(root)
+    #test_case = 'NOT (("abdc" OR "bdef") AND ((NOT ("xt")) OR "xxxt"))'
+    indicesfile = "D://WorkPlace/data/output/invert_indices.dict"
+    #root = build_grammar_tree(test_case)
+    #print_tree(root)
+    #stack = tree_to_stack(root)
+    #print(stack) 
+    set = tree_search(indicesfile)
+    print(set)
+
