@@ -1,6 +1,7 @@
 from enum import Enum
 import pickle
-from re import A
+import nltk
+
 
 class TokenType(Enum):
     NONE = 0
@@ -166,11 +167,13 @@ def tree_search(indicesfile:str):
     stack = tree_to_stack(root)
     fullset = set(inverse_indices.keys())
     setstack = []
+    porter_stemmer = nltk.stem.PorterStemmer()
 
     for node in stack:
         if node.token.type == TokenType.WORD:     #TokenType.WORD:
-            if node.token.value in inverse_indices.keys():
-                set1 = set(inverse_indices[node.token.value].keys())
+            word = porter_stemmer.stem(node.token.value)
+            if word in inverse_indices.keys():
+                set1 = set(inverse_indices[word].keys())
             else:
                 set1 = set()
             setstack.append(set1)
