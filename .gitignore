@@ -10,3 +10,6 @@ lab1/output/
 
 # IDE config
 .vscode/
+
+# tmp files
+*/tmp/
