@@ -14,7 +14,7 @@ class TokenType(Enum):
 
 
 class Token():
-    def __init__(self, type=TokenType.NONE, value="") -> None:
+    def __init__(self, type=TokenType.NONE, value=""):
         '''
         :param type         Token 种类
         :param value        Token 的值，字符串
@@ -23,7 +23,7 @@ class Token():
         self.value = value
 
 
-class Tree():
+class Tree():   
     def __init__(self, token: Token):
         self.token = token
         self.children = []
@@ -197,5 +197,5 @@ if __name__ == "__main__":
     #stack = tree_to_stack(root)
     #print(stack) 
     set = tree_search(indicesfile)
-    print(set)
+    print(set)      #返回值是id 而不是uuid
 
