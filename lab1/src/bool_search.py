@@ -184,7 +184,7 @@ def tree_to_stack(root: Tree):
     stack2.reverse()
     return stack2
 
-def tree_search(indicesfile:str):
+def bool_search(indicesfile:str):
     #text = input()
     #text = 'NOT (("abdc" OR "bdef") AND ((NOT ("xt")) OR "xxxt"))'
     text = '"card" OR "member"'
@@ -225,6 +225,6 @@ if __name__ == "__main__":
     indicesfile = "lab1/data/output/invert_indices.dict"
     #root = build_grammar_tree(test_case)
     #print_tree(root)
-    set = tree_search(indicesfile)
+    set = bool_search(indicesfile)
     print(set)      #返回值是id 而不是uuid
 
