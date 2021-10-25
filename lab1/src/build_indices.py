@@ -82,7 +82,7 @@ def build(infiles: list, stopfile: str, outfile: str):
         for id, v in id_list.items():
             word_len = invert_indices["INFO"][id]
 
-            invert_indices[word][id] = float(v / word_len ) *\
+            invert_indices[word][id] = float(v / word_len) *\
                                        math.log(float(N / (len(id_list) + 1)))
 
     # save to outfile
