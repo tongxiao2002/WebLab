@@ -1,6 +1,7 @@
 import math
 import nltk
 import pickle
+from nltk.util import invert_dict
 import numpy as np
 from nltk.stem.porter import PorterStemmer
 
@@ -50,7 +51,7 @@ def get_searchwords(filename: str, indice: dir):
 
 def compute_vsm(searchwordsfile: str, indicefile: str):
     picklefile = open(indicefile, 'rb')
-    inverse_indice = pickle.load(picklefile)
+    inverse_indice = pickle.load(picklefile)   
 
     searchtfidf, searchnorm = get_searchwords(searchwordsfile, inverse_indice)
     textvsm = [TextInfo(0, 0) for _ in range(N)]  # record Textinfo 记录cosine 累加的结果·
@@ -77,6 +78,8 @@ def compute_vsm(searchwordsfile: str, indicefile: str):
     origincosine = textcosine[:]
     textcosine.sort(reverse=True)
 
+    print(textcosine[:1000])
+
     for cosine in textcosine[:10]:
         closestid.append(origincosine.index(cosine))
 
@@ -84,7 +87,6 @@ def compute_vsm(searchwordsfile: str, indicefile: str):
 
 
 if __name__ == "__main__":
-    # keywords = "best worst delta"
     # keywords = keywords.split()
     # # normalization
     # invert_indices = "lab1/output/invert_indices.dict"
@@ -92,7 +94,8 @@ if __name__ == "__main__":
     # doc_ids = semantic_search(invert_indices, keywords)
     # print(doc_ids)
     searchwordsfile = "lab1/data/searchwords.txt"
-    indicefile = "lab1/output/invert_indices.dict"
+    indicefile = "lab1/data/output/invert_indices.dict"
 
     closestid = compute_vsm(searchwordsfile, indicefile)
     print(closestid)
+

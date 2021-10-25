@@ -92,8 +92,8 @@ def build(infiles: list, stopfile: str, outfile: str):
 
     
 if __name__ == "__main__":
-    #files = ["../../../data/" + "2018_0" + str(idx) + ".json" for idx in range(1, 6)]
-    files = ["D://WorkPlace/data/2018.json"]
-    stopfile = "D://WorkPlace/data/stopwords.txt"
-    outfile = "D://WorkPlace/data/output/invert_indices.dict"
+    files = ["lab1/data/" + "2018_0" + str(idx) + ".json" for idx in range(1, 6)]
+    #files = ["D://WorkPlace/data/2018.json"]
+    stopfile = "lab1/data/stopwords.txt"
+    outfile = "lab1/data/output/invert_indices.dict"
     build(files, stopfile, outfile)

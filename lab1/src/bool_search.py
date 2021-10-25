@@ -222,11 +222,9 @@ def tree_search(indicesfile:str):
 
 if __name__ == "__main__":
     #test_case = 'NOT (("abdc" OR "bdef") AND ((NOT ("xt")) OR "xxxt"))'
-    indicesfile = "D://WorkPlace/data/output/invert_indices.dict"
+    indicesfile = "lab1/data/output/invert_indices.dict"
     #root = build_grammar_tree(test_case)
     #print_tree(root)
-    #stack = tree_to_stack(root)
-    #print(stack) 
     set = tree_search(indicesfile)
     print(set)      #返回值是id 而不是uuid
 
