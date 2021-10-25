@@ -121,18 +121,49 @@ def build_grammar_tree(text: str):
     return root
 
 
-def print_tree(root: Tree):     #
+def print_tree(root: Tree):
     if len(root.children) == 0:
-        print(root.token.value, end=" \n")
+        print(root.token.value, end=" ")
     elif len(root.children) == 1:
+        print(root.token.value, end=" ")
         print_tree(root.children[0])
-        print(root.token.value, end=" \n")      
     elif len(root.children) == 2:
-        print_tree(root.children[0])        
+        print_tree(root.children[0])
+        print(root.token.value, end=" ")
         print_tree(root.children[1])
-        print(root.token.value, end=" \n")
     else:
         raise ValueError
+
+
+def compute_tree(invert_indices: dict, root: Tree) -> set:
+    if root.token.type == TokenType.WORD:
+        token = root.token.value
+        try:
+            doc_id = set(invert_indices[token].keys())
+        except KeyError:
+            raise KeyError("token '{}' doesn't exist!".format(token))
+        return doc_id
+    elif root.token.type == TokenType.NOT:
+        N = 306242
+        token = root.token.value
+        total_doc = set([idx for idx in range(N)])
+        return total_doc.difference(set(invert_indices[token].keys()))
+    elif root.token.type == TokenType.AND:
+        left_result = compute_tree(invert_indices, root.children[0])
+        right_result = compute_tree(invert_indices, root.children[1])
+        return left_result.intersection(right_result)
+    elif root.token.type == TokenType.OR:
+        left_result = compute_tree(invert_indices, root.children[0])
+        right_result = compute_tree(invert_indices, root.children[1])
+        return left_result.union(right_result)
+    else:
+        raise ValueError("Illegal Operator.")
+
+
+def bool_search(invert_indices: dict, expr: str) -> set:
+    root = build_grammar_tree(expr)
+    return compute_tree(invert_indices, root)
+
 
 def tree_to_stack(root: Tree):
     if root == None:
