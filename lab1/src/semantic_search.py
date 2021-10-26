@@ -18,11 +18,9 @@ def semantic_search(invert_indices: dict, keywords: list):
             tfidf[id] += value
     return np.argsort(tfidf)[-10:].tolist()
 
-
 N = 306242
 
 # 思路：
-
 
 class TextInfo():
     def __init__(self, d: float, k: float):
@@ -87,8 +85,6 @@ def compute_vsm(searchwordsfile: str, indicefile: str):
 
 
 if __name__ == "__main__":
-    # keywords = keywords.split()
-    # # normalization
     # invert_indices = "lab1/output/invert_indices.dict"
     # invert_indices = load_dict(invert_indices)
     # doc_ids = semantic_search(invert_indices, keywords)
