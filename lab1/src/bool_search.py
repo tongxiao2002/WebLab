@@ -52,15 +52,15 @@ def lexer(text: str):
             lex_result.append(Token(TokenType.WORD, text[idx + 1:next_quota_idx]))
             idx = next_quota_idx + 1
             continue
-        elif text[idx:idx + 3] == "NOT":
+        elif text[idx:idx + 3].upper() == "NOT":
             lex_result.append(Token(TokenType.NOT, "NOT"))
             idx += 3
             continue
-        elif text[idx:idx + 3] == "AND":
+        elif text[idx:idx + 3].upper() == "AND":
             lex_result.append(Token(TokenType.AND, "AND"))
             idx += 3
             continue
-        elif text[idx:idx + 2] == "OR":
+        elif text[idx:idx + 2].upper() == "OR":
             lex_result.append(Token(TokenType.OR, "OR"))
             idx += 2
             continue
@@ -177,26 +177,23 @@ def tree_to_stack(root: Tree):
             stack1.append(node.children[0])
         elif (len(node.children)) == 2:
             stack1.append(node.children[0])
-            stack1.append(node.children[1])
-            
+            stack1.append(node.children[1])           
         stack2.append(node)
       
     stack2.reverse()
     return stack2
 
-def bool_search(indicesfile:str):
-    #text = input()
+
+def bool_search(indicesfile:str, boolsearchfile:str):
     #text = 'NOT (("abdc" OR "bdef") AND ((NOT ("xt")) OR "xxxt"))'
-    text = '"card" OR "member"'
+    text = '(("company" or "precent") ANd ((NOT ("income")) OR "march"))'
     root = build_grammar_tree(text)
     
     pickle_file = open(indicesfile, 'rb')
     inverse_indices = pickle.load(pickle_file)
 
-    id_list = list(inverse_indices["UUID"].keys())  #for not option
-
     stack = tree_to_stack(root)
-    fullset = set(inverse_indices.keys())
+    fullset = set(uuid_indice.keys())
     setstack = []
     porter_stemmer = nltk.stem.PorterStemmer()
 
@@ -216,15 +213,23 @@ def bool_search(indicesfile:str):
         elif node.token.type == TokenType.OR:       #:
             setstack[-2] = setstack[-2] | setstack[-1] 
             setstack.pop()
-        #print(len(setstack))
-
     return setstack[0]
 
+
 if __name__ == "__main__":
-    #test_case = 'NOT (("abdc" OR "bdef") AND ((NOT ("xt")) OR "xxxt"))'
-    indicesfile = "lab1/data/output/invert_indices.dict"
-    #root = build_grammar_tree(test_case)
-    #print_tree(root)
-    set = bool_search(indicesfile)
-    print(set)      #返回值是id 而不是uuid
+    indicesfile = "lab1/data/output/invert_indices_test.dict"
+    boolsearchfile = "lab1/data/boolsewsarchwords.txt"
+    id2uuidfile = "lab1/data/output/id2uuid_test.dict"
+    
+    idset = bool_search(indicesfile, boolsearchfile)
+
+    pickle_idfile = open(id2uuidfile, 'rb')
+    uuid_indice = pickle.load(pickle_idfile) 
+    for id in idset:
+        if id in uuid_indice:
+            print(uuid_indice[id])
+        else:
+            print("illegal id number")
+
+    
 

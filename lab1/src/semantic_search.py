@@ -76,8 +76,6 @@ def compute_vsm(searchwordsfile: str, indicefile: str):
     origincosine = textcosine[:]
     textcosine.sort(reverse=True)
 
-    print(textcosine[:1000])
-
     for cosine in textcosine[:10]:
         closestid.append(origincosine.index(cosine))
 
@@ -91,7 +89,17 @@ if __name__ == "__main__":
     # print(doc_ids)
     searchwordsfile = "lab1/data/searchwords.txt"
     indicefile = "lab1/data/output/invert_indices.dict"
+    id2uuidfile = "lab1/data/output/id2uuid.dict"
 
     closestid = compute_vsm(searchwordsfile, indicefile)
+
+    pickle_idfile = open(id2uuidfile, 'rb')
+    uuid_indice = pickle.load(pickle_idfile) 
+    for id in closestid:
+        if id in uuid_indice:
+            print(uuid_indice[id])
+        else:
+            print("illegal id number")
+
     print(closestid)
 
