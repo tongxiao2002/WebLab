@@ -217,10 +217,10 @@ def bool_search(indicesfile:str, boolsearchfile:str):
 
 
 if __name__ == "__main__":
-    indicesfile = "lab1/data/output/invert_indices_test.dict"
+    indicesfile = "lab1/data/output/invert_indices.dict"
     boolsearchfile = "lab1/data/boolsewsarchwords.txt"
-    id2uuidfile = "lab1/data/output/id2uuid_test.dict"
-    
+    id2uuidfile = "lab1/data/output/id2uuid.dict"
+
     idset = bool_search(indicesfile, boolsearchfile)
 
     pickle_idfile = open(id2uuidfile, 'rb')
