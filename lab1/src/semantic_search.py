@@ -93,7 +93,7 @@ if __name__ == "__main__":
 
     closestid = compute_vsm(searchwordsfile, indicefile)
 
-    pickle_idfile = open(id2uuidfile, 'rb')
+    pickle_idfile = open(id2uuidfile, 'rb')     ## id to uuid
     uuid_indice = pickle.load(pickle_idfile) 
     for id in closestid:
         if id in uuid_indice:

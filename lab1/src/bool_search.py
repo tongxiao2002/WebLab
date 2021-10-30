@@ -198,19 +198,19 @@ def bool_search(indicesfile:str, boolsearchfile:str):
     porter_stemmer = nltk.stem.PorterStemmer()
 
     for node in stack:
-        if node.token.type == TokenType.WORD:     #TokenType.WORD:
+        if node.token.type == TokenType.WORD:    
             word = porter_stemmer.stem(node.token.value)
             if word in inverse_indices.keys():
                 set1 = set(inverse_indices[word].keys())
             else:
                 set1 = set()
             setstack.append(set1)
-        elif node.token.type == TokenType.NOT:     #:
+        elif node.token.type == TokenType.NOT:     
             setstack[-1] = fullset.difference(setstack[-1])
-        elif node.token.type == TokenType.AND:       #:
+        elif node.token.type == TokenType.AND:       
             setstack[-2] = setstack[-2] & setstack[-1] 
             setstack.pop()
-        elif node.token.type == TokenType.OR:       #:
+        elif node.token.type == TokenType.OR:      
             setstack[-2] = setstack[-2] | setstack[-1] 
             setstack.pop()
     return setstack[0]
@@ -223,7 +223,7 @@ if __name__ == "__main__":
 
     idset = bool_search(indicesfile, boolsearchfile)
 
-    pickle_idfile = open(id2uuidfile, 'rb')
+    pickle_idfile = open(id2uuidfile, 'rb')     #id to uuid 
     uuid_indice = pickle.load(pickle_idfile) 
     for id in idset:
         if id in uuid_indice:
