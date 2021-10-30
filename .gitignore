@@ -13,3 +13,6 @@ lab1/output/
 
 # tmp files
 */tmp/
+
+# test files
+*/test/

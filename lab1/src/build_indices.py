@@ -65,7 +65,7 @@ def build(infiles: list, stopfile: str, outfile: str, id2uuidfile:str):
     pool.join()
 
     for p in process_list:
-        indices, info ,uuid = p.get()
+        indices, info, uuid = p.get()
         for k, v in indices.items():
             if k not in invert_indices.keys():
                 invert_indices[k] = v
