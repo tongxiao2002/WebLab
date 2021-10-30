@@ -233,13 +233,14 @@ def bool_search(indicesfile: str, id2uuidfile: str, expression: str):
 if __name__ == "__main__":
     indicesfile = "lab1/output/invert_indices.dict"
     # boolsearchfile = "lab1/data/boolsewsarchwords.txt"
-    expression = '(("company" or "precent") ANd ((NOT ("income")) or "march"))'
-    expression = '"Atlanta" or "airport" and "power" and not "outage"'
+    # expression = '(("company" or "precent") ANd ((NOT ("income")) or "march"))'
+    # expression = '"Atlanta" or "airport" and "power" and not "outage"'
     id2uuidfile = "lab1/output/id2uuid.pkl"
+    expression = input("Input Expression: ")
 
     uuidset = bool_search(indicesfile, id2uuidfile, expression)
     print(uuidset)
-    print(len(uuidset))
+    print("Document number: {}".format(len(uuidset)))
 
     # pickle_idfile = open(id2uuidfile, 'rb')
     # uuid_indice = pickle.load(pickle_idfile) 

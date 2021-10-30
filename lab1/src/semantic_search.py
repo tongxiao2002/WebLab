@@ -1,7 +1,6 @@
 import math
 import nltk
 import pickle
-from nltk.util import invert_dict
 import numpy as np
 from nltk.stem.porter import PorterStemmer
 
@@ -92,7 +91,8 @@ if __name__ == "__main__":
     # invert_indices = load_dict(invert_indices)
     # doc_ids = semantic_search(invert_indices, keywords)
     # print(doc_ids)
-    searchwordsfile = "lab1/data/searchwords.txt"
+    # searchwordsfile = "lab1/data/searchwords.txt"
+    searchwordsfile = input("Input Search Words File: ")
     indicefile = "lab1/output/invert_indices.dict"
     id2uuidfile = "lab1/output/id2uuid.pkl"
 
