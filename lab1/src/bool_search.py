@@ -35,6 +35,7 @@ class Tree():
 def lexer(text: str):
     lex_result = []
     idx = 0
+    porter_stemmer = nltk.stem.PorterStemmer()
     while idx < len(text):
         if text[idx] == " ":
             idx += 1
@@ -49,7 +50,7 @@ def lexer(text: str):
             continue
         elif text[idx] == "\"" or text[idx] == "'":
             next_quota_idx = text[idx + 1:].find(text[idx]) + idx + 1
-            lex_result.append(Token(TokenType.WORD, text[idx + 1:next_quota_idx]))
+            lex_result.append(Token(TokenType.WORD, porter_stemmer.stem(text[idx + 1:next_quota_idx].lower())))
             idx = next_quota_idx + 1
             continue
         elif text[idx:idx + 3].upper() == "NOT":
@@ -89,6 +90,7 @@ def parser(lex_result: list):
     lex_result = token_pair_strip(lex_result, ltokentype=TokenType.LB, rtokentype=TokenType.RB)
     root = Tree(Token())
     depth = 0
+    top_list = []
     for idx, token in enumerate(lex_result):
         assert depth >= 0, "Illegal bracket pairs."
         if token.type == TokenType.LB:
@@ -98,12 +100,19 @@ def parser(lex_result: list):
             depth -= 1
             continue
         elif (token.type == TokenType.AND or token.type == TokenType.OR) and depth == 0:
-            root = Tree(token)
-            root.add_children(parser(lex_result[:idx]))
-            root.add_children(parser(lex_result[idx + 1:]))
-            break
+            top_list.append([token, idx])
+            # root = Tree(token)
+            # root.add_children(parser(lex_result[:idx]))
+            # root.add_children(parser(lex_result[idx + 1:]))
+            continue
     assert depth == 0, "Illegal bracket pairs."
-    if root.token.type == TokenType.NONE:
+    if top_list:
+        token, idx = top_list[-1]
+        root = Tree(token)
+        root.add_children(parser(lex_result[:idx]))
+        root.add_children(parser(lex_result[idx + 1:]))
+    # if root.token.type == TokenType.NONE:
+    else:
         # this indicates that there doesn't exist top AND and OR in lex_result
         if lex_result[0].type == TokenType.NOT:
             # NOT clause
@@ -184,52 +193,61 @@ def tree_to_stack(root: Tree):
     return stack2
 
 
-def bool_search(indicesfile:str, boolsearchfile:str):
+def bool_search(indicesfile: str, id2uuidfile: str, expression: str):
     #text = 'NOT (("abdc" OR "bdef") AND ((NOT ("xt")) OR "xxxt"))'
-    text = '(("company" or "precent") ANd ((NOT ("income")) OR "march"))'
+    # text = '(("company" or "precent") ANd ((NOT ("income")) OR "march"))'
+    text = expression
     root = build_grammar_tree(text)
     
     pickle_file = open(indicesfile, 'rb')
     inverse_indices = pickle.load(pickle_file)
+    id2uuid = pickle.load(open(id2uuidfile, "rb"))
 
     stack = tree_to_stack(root)
-    fullset = set(uuid_indice.keys())
+    fullset = set(id2uuid.keys())
     setstack = []
-    porter_stemmer = nltk.stem.PorterStemmer()
+    # porter_stemmer = nltk.stem.PorterStemmer()
 
     for node in stack:
-        if node.token.type == TokenType.WORD:    
-            word = porter_stemmer.stem(node.token.value)
+        if node.token.type == TokenType.WORD:     #TokenType.WORD:
+            word = node.token.value
             if word in inverse_indices.keys():
                 set1 = set(inverse_indices[word].keys())
             else:
                 set1 = set()
             setstack.append(set1)
-        elif node.token.type == TokenType.NOT:     
+        elif node.token.type == TokenType.NOT:     #:
             setstack[-1] = fullset.difference(setstack[-1])
-        elif node.token.type == TokenType.AND:       
+        elif node.token.type == TokenType.AND:       #:
             setstack[-2] = setstack[-2] & setstack[-1] 
             setstack.pop()
-        elif node.token.type == TokenType.OR:      
+        elif node.token.type == TokenType.OR:       #:
             setstack[-2] = setstack[-2] | setstack[-1] 
             setstack.pop()
-    return setstack[0]
+    results = set()
+    for id in setstack[0]:
+        results.add(id2uuid[id])
+    return results
 
 
 if __name__ == "__main__":
-    indicesfile = "lab1/data/output/invert_indices.dict"
-    boolsearchfile = "lab1/data/boolsewsarchwords.txt"
-    id2uuidfile = "lab1/data/output/id2uuid.dict"
+    indicesfile = "lab1/output/invert_indices.dict"
+    # boolsearchfile = "lab1/data/boolsewsarchwords.txt"
+    expression = '(("company" or "precent") ANd ((NOT ("income")) or "march"))'
+    expression = '"Atlanta" or "airport" and "power" and not "outage"'
+    id2uuidfile = "lab1/output/id2uuid.pkl"
 
-    idset = bool_search(indicesfile, boolsearchfile)
+    uuidset = bool_search(indicesfile, id2uuidfile, expression)
+    print(uuidset)
+    print(len(uuidset))
 
-    pickle_idfile = open(id2uuidfile, 'rb')     #id to uuid 
-    uuid_indice = pickle.load(pickle_idfile) 
-    for id in idset:
-        if id in uuid_indice:
-            print(uuid_indice[id])
-        else:
-            print("illegal id number")
+    # pickle_idfile = open(id2uuidfile, 'rb')
+    # uuid_indice = pickle.load(pickle_idfile) 
+    # for id in idset:
+    #     if id in uuid_indice:
+    #         print(uuid_indice[id])
+    #     else:
+    #         print("illegal id number")
 
     
 

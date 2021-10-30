@@ -47,9 +47,10 @@ def get_searchwords(filename: str, indice: dir):
     return searchtfidf, math.sqrt(norm)
 
 
-def compute_vsm(searchwordsfile: str, indicefile: str):
+def compute_vsm(searchwordsfile: str, indicefile: str, id2uuidfile: str):
     picklefile = open(indicefile, 'rb')
-    inverse_indice = pickle.load(picklefile)   
+    inverse_indice = pickle.load(picklefile)
+    id2uuid = pickle.load(open(id2uuidfile, "rb"))
 
     searchtfidf, searchnorm = get_searchwords(searchwordsfile, inverse_indice)
     textvsm = [TextInfo(0, 0) for _ in range(N)]  # record Textinfo 记录cosine 累加的结果·
@@ -79,7 +80,11 @@ def compute_vsm(searchwordsfile: str, indicefile: str):
     for cosine in textcosine[:10]:
         closestid.append(origincosine.index(cosine))
 
-    return closestid
+    results = set()
+    for id in closestid:
+        results.add(id2uuid[id])
+
+    return results
 
 
 if __name__ == "__main__":
@@ -88,18 +93,18 @@ if __name__ == "__main__":
     # doc_ids = semantic_search(invert_indices, keywords)
     # print(doc_ids)
     searchwordsfile = "lab1/data/searchwords.txt"
-    indicefile = "lab1/data/output/invert_indices.dict"
-    id2uuidfile = "lab1/data/output/id2uuid.dict"
+    indicefile = "lab1/output/invert_indices.dict"
+    id2uuidfile = "lab1/output/id2uuid.pkl"
 
-    closestid = compute_vsm(searchwordsfile, indicefile)
+    closestid = compute_vsm(searchwordsfile, indicefile, id2uuidfile)
 
-    pickle_idfile = open(id2uuidfile, 'rb')     ## id to uuid
-    uuid_indice = pickle.load(pickle_idfile) 
-    for id in closestid:
-        if id in uuid_indice:
-            print(uuid_indice[id])
-        else:
-            print("illegal id number")
+    # pickle_idfile = open(id2uuidfile, 'rb')     ## id to uuid
+    # uuid_indice = pickle.load(pickle_idfile) 
+    # for id in closestid:
+    #     if id in uuid_indice:
+    #         print(uuid_indice[id])
+    #     else:
+    #         print("illegal id number")
 
     print(closestid)
 
