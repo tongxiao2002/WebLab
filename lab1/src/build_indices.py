@@ -18,7 +18,7 @@ def yield_text(filename: str):
 def build_one_file(filename: str, stopwords: list, offset_idx: int):
     invert_indices = {}
     info_indice = {}    #recode the len of text 
-    uuid_indice = {}   #recode relationship of id and uuid 
+    uuid_indice = {}   #recode relationship of id and uuid
 
     porter_stemmer = nltk.stem.PorterStemmer()
 
@@ -93,6 +93,6 @@ if __name__ == "__main__":
     files = ["lab1/data/" + "2018_0" + str(idx) + ".json" for idx in range(1, 6)]
     #files = ["lab1/data/2018.json"]
     stopfile = "lab1/data/stopwords.txt"
-    outfile = "lab1/data/output/invert_indices.dict"
-    id2uuidfile = "lab1/data/output/id2uuid.dict"
+    outfile = "lab1/output/invert_indices.dict"
+    id2uuidfile = "lab1/output/id2uuid.dict"
     build(files, stopfile, outfile, id2uuidfile)
