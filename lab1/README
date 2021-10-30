@@ -1,0 +1,65 @@
+# 运行环境
+
+编程语言： `Python 3.8.10 64-bit`
+
+所用第三方包如下：
+
+```python
+nltk==3.6.4
+gensim==3.8.3
+numpy==1.21.2
+tqdm==4.62.0
+```
+
+# 运行方式
+
+## bool_search
+
+执行方式为：在终端使用 `python3` 运行 `bool_search.py` 文件，然后输入要执行的表达式即可。
+
+如：
+
+```shell
+$ python3 lab1/src/bool_search.py
+Input Expression: "xt" and "gly"
+
+# output
+```
+
+输出格式为：输出所有满足条件的文档的 uuid，最后会输出满足条件的文档的数量。
+
+## semantic_search
+
+执行方式为：在终端使用 `python3` 运行 `bool_search.py` 文件，然后输入存有搜索词的文本文件。
+
+如：
+
+```shell
+$ python3 lab1/src/semantic_search.py
+Input Search Words File: lab1/data/searchwords.txt
+
+# output
+```
+
+该文本文件的格式为每行一个单词，如下所示：
+
+```python
+company
+percent
+income
+quarter
+financial
+...
+```
+
+# 关键函数说明：
+
+# bool_search.py
+
+`lexer()`: 将一段表达式文本通过词法分析，转化为一个 `Token` 的列表，方便下面构建语法树。
+
+`parser()`: 将来自 `lexer()` 的 `Token` 列表进行分析，递归地构建出一颗语法树。具体构建方式在实验报告中有说明。
+
+# semantic_search.py
+
+`compute_vsm()`: 根据 `cosine` 相似度公式计算所有文档的 `tf-idf` 向量和搜索词的 `tf-idf` 向量之间的相似度。然后取出 `cosine` 相似度最高的 10 个文本，将对应的 id 转为 uuid 之后进行输出。
