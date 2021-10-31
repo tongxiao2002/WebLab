@@ -249,6 +249,3 @@ if __name__ == "__main__":
     #         print(uuid_indice[id])
     #     else:
     #         print("illegal id number")
-
-    
-

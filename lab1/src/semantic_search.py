@@ -79,12 +79,12 @@ def compute_vsm(searchwordsfile: str, indicefile: str, id2uuidfile: str):
     for cosine in textcosine[:10]:
         closestid.append(origincosine.index(cosine))
 
-    #results = set()
-    #for id in closestid:
-    #    if id in id2uuid:
-    #        results.add(id2uuid[id])
+    results = set()
+    for id in closestid:
+       if id in id2uuid:
+           results.add(id2uuid[id])
 
-    return closestid
+    return results
 
 
 if __name__ == "__main__":
