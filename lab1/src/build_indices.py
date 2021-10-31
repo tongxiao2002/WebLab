@@ -87,11 +87,9 @@ def build(infiles: list, stopfile: str, outfile: str, id2uuidfile:str):
     pickle.dump(invert_indices, open(outfile, "wb"))
     pickle.dump(uuid_indice, open(id2uuidfile, "wb"))
 
-
     
 if __name__ == "__main__":
     files = ["lab1/data/" + "2018_0" + str(idx) + ".json" for idx in range(1, 6)]
-    #files = ["lab1/data/2018.json"]
     stopfile = "lab1/data/stopwords.txt"
     outfile = "lab1/output/invert_indices.dict"
     id2uuidfile = "lab1/output/id2uuid.dict"

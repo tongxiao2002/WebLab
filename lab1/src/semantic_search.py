@@ -79,11 +79,12 @@ def compute_vsm(searchwordsfile: str, indicefile: str, id2uuidfile: str):
     for cosine in textcosine[:10]:
         closestid.append(origincosine.index(cosine))
 
-    results = set()
-    for id in closestid:
-        results.add(id2uuid[id])
+    #results = set()
+    #for id in closestid:
+    #    if id in id2uuid:
+    #        results.add(id2uuid[id])
 
-    return results
+    return closestid
 
 
 if __name__ == "__main__":
@@ -94,17 +95,9 @@ if __name__ == "__main__":
     # searchwordsfile = "lab1/data/searchwords.txt"
     searchwordsfile = input("Input Search Words File: ")
     indicefile = "lab1/output/invert_indices.dict"
-    id2uuidfile = "lab1/output/id2uuid.pkl"
+    id2uuidfile = "lab1/output/id2uuid.dict"
 
     closestid = compute_vsm(searchwordsfile, indicefile, id2uuidfile)
-
-    # pickle_idfile = open(id2uuidfile, 'rb')     ## id to uuid
-    # uuid_indice = pickle.load(pickle_idfile) 
-    # for id in closestid:
-    #     if id in uuid_indice:
-    #         print(uuid_indice[id])
-    #     else:
-    #         print("illegal id number")
 
     print(closestid)
 

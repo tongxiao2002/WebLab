@@ -37,8 +37,8 @@ def text2searchwords_info(num: int):
             if count == linenum:
                 data = json.loads(line)
                 s = data["text"]
-                sid = data["id"]
-                print("text id:", sid)
+                sid = data["uuid"]
+                print("uuid:", sid)
                 break
 
     search_words = []
@@ -58,11 +58,11 @@ def text2searchwords_info(num: int):
         if word in search_words:
             counter1 += 1
 
-    print("num and times of searchwords\n", counter, counter1)
+    print(counter, counter1)
     # print(len(word_list))
 
 
-idlist = []
+idlist = [192386, 277300, 248047, 202495, 287197, 185433, 114684, 60532, 219098, 289296]
 
 for id in idlist:
     text2searchwords_info(id)
