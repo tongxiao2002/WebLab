@@ -17,6 +17,8 @@ MODELS = {
 
 def train(config: dict, logger: logging.Logger):
     device = config["parameter"]["device"]
+    if not os.path.isdir(config["model"]["model_save_dir"]):
+        os.mkdir(config["model"]["model_save_dir"])
     if not os.path.isfile(config["embedding"]["entity_embedding_path"]) or not os.path.isfile(config["embedding"]["relation_embedding_path"]):
         build_word2vec(config["data"]["entity_file"], config["data"]["relation_file"], vector_size=config["embedding"]["emb_dim"])
     entity_pre_emb = pickle.load(open(config["embedding"]["entity_embedding_path"], "rb"))
