@@ -8,6 +8,8 @@ import torch
 
 
 def get_logger(log_dir) -> logging.Logger:
+    if not os.path.isdir(log_dir):
+        os.mkdir(log_dir)
     logger = logging.getLogger(name="TransE")
     logger.setLevel(logging.INFO)
     now = datetime.now()
