@@ -1,0 +1,21 @@
+data:
+  entity_file: lab2/data/entity_with_text.txt
+  eval_file: lab2/data/cleaned_dev.txt
+  relation_file: lab2/data/relation_with_text.txt
+  test_file: lab2/data/cleaned_test.txt
+  train_file: lab2/data/cleaned_train.txt
+embedding:
+  emb_dim: 200
+  entity_embedding_path: lab2/output/entity_emb.bin
+  relation_embedding_path: lab2/output/relation_emb.bin
+log:
+  log_dir: lab2/logs
+model:
+  model_name: TransH
+  model_save_path: lab2/output
+parameter:
+  batch_size: 256
+  decay: 0
+  device: cuda:0
+  epochs: 50
+  lr: 1
