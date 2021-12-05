@@ -7,6 +7,9 @@
 # data and outputs
 lab1/data/
 lab1/output/
+lab2/data/
+lab2/output/
+lab2/OpenKE/
 
 # IDE config
 .vscode/
@@ -16,3 +19,9 @@ lab1/output/
 
 # test files
 */test/
+
+# log files
+lab2/logs
+
+# cache dirs
+**/__pycache__/
