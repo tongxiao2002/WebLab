@@ -18,11 +18,15 @@ class TransE(torch.nn.Module):
         self.entity_embedding = torch.nn.Embedding(entity_word_num, emb_dim)
         self.relation_embedding = torch.nn.Embedding(relation_word_num, emb_dim)
         if entity_pre_embedding is not None and relation_pre_embedding is not None:
-            self.entity_embedding.weight.data.copy_(torch.from_numpy(entity_pre_embedding))
-            self.relation_embedding.weight.data.copy_(torch.from_numpy(relation_pre_embedding))
+            # self.entity_embedding.weight.data.copy_(torch.from_numpy(entity_pre_embedding))
+            # self.relation_embedding.weight.data.copy_(torch.from_numpy(relation_pre_embedding))
+            torch.nn.init.xavier_normal_(self.entity_embedding.weight.data)
+            torch.nn.init.xavier_normal_(self.relation_embedding.weight.data)
         else:
             torch.nn.init.xavier_normal_(self.entity_embedding.weight.data)
             torch.nn.init.xavier_normal_(self.relation_embedding.weight.data)
+        self.relation_embedding.weight.data = F.normalize(self.relation_embedding.weight.data, 2, -1)
+
         self.entity_idx2word = {}
         for k, v in self.entity_word2idx.items():
             self.entity_idx2word[v] = k
@@ -39,15 +43,15 @@ class TransE(torch.nn.Module):
         t = self.entity_embedding(t)
         r = self.relation_embedding(r)
         # neg_h_idx = torch.LongTensor([[random.randint(0, len(self.entity_word2idx) - 1)] for _ in range(len(h))]).to(h.device)
-        neg_t_idx = torch.LongTensor([[random.randint(0, len(self.entity_word2idx) - 1)] for _ in range(len(t))]).to(h.device)   # random tail entity except _UNK
+        neg_t_idx = torch.LongTensor([[random.randint(0, len(self.entity_word2idx) - 1)] for _ in range(len(t))]).to(h.device)   # random tail entity
         # neg_t = torch.LongTensor([[self.entity_idx2word[t_idx]] for t_idx in neg_t_idx]).to(h.device)
         # neg_h = self.entity_embedding(neg_h_idx)
         neg_t = self.entity_embedding(neg_t_idx)
-        h = F.normalize(h, 2, -1)
-        t = F.normalize(t, 2, -1)
-        r = F.normalize(r, 2, -1)
+        # h = F.normalize(h, 2, -1)
+        # t = F.normalize(t, 2, -1)
+        # r = F.normalize(r, 2, -1)
         # neg_h = F.normalize(neg_h, 2, -1)
-        neg_t = F.normalize(neg_t, 2, -1)
+        # neg_t = F.normalize(neg_t, 2, -1)
         score = (h + r) - t
         neg_score = (h + r) - neg_t
         return score, neg_score
@@ -82,11 +86,17 @@ class TransE(torch.nn.Module):
             results["hit@10"].append(result_idx[:10])
         return results
 
+    def normalize_embedding(self):
+        self.entity_embedding.weight.data = F.normalize(self.entity_embedding.weight.data, 2, -1)
+
 
 class TransH(torch.nn.Module):
     def __init__(self, entity_word2idx: dict,
                        relation_word2idx: dict,
                        emb_dim: int=200,
+                       margin: float=1.0,
+                       C: float=1.0,
+                       eps: float=0.001,
                        entity_pre_embedding: np.ndarray=None,
                        relation_pre_embedding: np.ndarray=None):
         super(TransH, self).__init__()
@@ -97,6 +107,9 @@ class TransH(torch.nn.Module):
         self.entity_embedding = torch.nn.Embedding(entity_word_num, emb_dim)
         self.relation_embedding = torch.nn.Embedding(relation_word_num, emb_dim)
         self.norm_embedding = torch.nn.Embedding(relation_word_num, emb_dim)
+        self.margin = margin
+        self.C = C
+        self.eps = eps
         torch.nn.init.xavier_normal_(self.norm_embedding.weight.data)       # 初始化参数
         if entity_pre_embedding is not None and relation_pre_embedding is not None:
             self.entity_embedding.weight.data.copy_(torch.from_numpy(entity_pre_embedding))
@@ -131,13 +144,17 @@ class TransH(torch.nn.Module):
         # neg_t = torch.LongTensor([[self.entity_idx2word[t_idx]] for t_idx in neg_t_idx]).to(h.device)
         neg_t = self.entity_embedding(neg_t_idx)
         neg_t_v = self._transfer(neg_t, r_norm)
-        h_v = F.normalize(h_v, 2, -1)
-        t_v = F.normalize(t_v, 2, -1)
-        r = F.normalize(r, 2, -1)
-        neg_t_v = F.normalize(neg_t_v, 2, -1)
-        score = (h_v + r) - t_v
-        neg_score = (h_v + r) - neg_t_v
-        return score, neg_score
+        # h_v = F.normalize(h_v, 2, -1)
+        # t_v = F.normalize(t_v, 2, -1)
+        # r = F.normalize(r, 2, -1)
+        # neg_t_v = F.normalize(neg_t_v, 2, -1)
+        score = torch.norm((h_v + r) - t_v, p=2, dim=-1).flatten()
+        neg_score = torch.norm((h_v + r) - neg_t_v, p=2, dim=-1).flatten()
+
+        margin_loss = F.relu(score - neg_score + self.margin).mean()
+        entity_loss = F.relu(torch.norm(self.entity_embedding.weight.data, p=2, dim=-1) - 1).mean()
+        orth_loss = F.relu(torch.sum(self.relation_embedding.weight.data * self.norm_embedding.weight.data, dim=-1) / torch.norm(self.relation_embedding.weight.data, p=2, dim=-1) - self.eps ** 2).mean()
+        return margin_loss + self.C * (entity_loss + orth_loss)
 
     def predict(self, data):
         h, batch_r = data
@@ -154,14 +171,13 @@ class TransH(torch.nn.Module):
         # for vec in predict:
         #     predict_idx = torch.argmax(torch.cosine_similarity(vec, self.entity_embedding.weight.data, dim=1))
         #     results.append(self.entity_idx2word[predict_idx.item()])
-        r_norm = F.normalize(r_norm, 2, dim=-1).squeeze(dim=1)
+        # r_norm = F.normalize(r_norm, 2, dim=-1).squeeze(dim=1)
         results = {"hit@1": [], "hit@5": [], "hit@10": []}
         for tail_predict, norm_Hyper in zip(predict, r_norm):
             # compute entity_embedding in Hyperplane
             entity_hyper_embedding = self.entity_embedding.weight.data - torch.matmul(torch.sum(self.entity_embedding.weight.data * norm_Hyper,
                                                                                                 dim=-1,
-                                                                                                keepdim=True),
-                                                                                      torch.unsqueeze(norm_Hyper, dim=0))
+                                                                                                keepdim=True), norm_Hyper)
 
             scoreMat = tail_predict - entity_hyper_embedding
             scorelist = torch.norm(scoreMat, p=2, dim=-1, keepdim=False)
@@ -172,9 +188,13 @@ class TransH(torch.nn.Module):
             results["hit@10"].append(result_idx[:10])
         return results
 
+    def normalize_embedding(self):
+        self.entity_embedding.weight.data = F.normalize(self.entity_embedding.weight.data, 2, -1)
+        self.norm_embedding.weight.data = F.normalize(self.norm_embedding.weight.data, 2, -1)
+
 
 class MarginLoss(torch.nn.Module):
-    def __init__(self, margin: float=4.0):
+    def __init__(self, margin: float=1.0):
         super(MarginLoss, self).__init__()
         self.margin = margin
 
