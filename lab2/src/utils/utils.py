@@ -25,11 +25,13 @@ def get_logger(log_dir) -> logging.Logger:
     return logger
 
 
-def build_word2vec(entity_file: str, relation_file: str, vector_size: int=200):
+def build_word2vec(entity_file: str, relation_file: str, train_file: str, test_file: str, vector_size: int=200):
     entity_ids = []
     entity_sentences = []
     relation_ids = []
     relation_sentences = []
+    train_entity_ids = set()
+    train_relation_ids = set()
     with open(entity_file, "r", encoding="utf-8") as fin:
         for line in fin:
             id, sentence = line.strip().split("\t")
@@ -40,6 +42,17 @@ def build_word2vec(entity_file: str, relation_file: str, vector_size: int=200):
             id, sentence = line.strip().split("\t")
             relation_ids.append(int(id))
             relation_sentences.append(sentence.split())
+    with open(train_file, "r", encoding="utf-8") as fin:
+        for line in fin:
+            h, r, t = line.strip().split("\t")
+            train_entity_ids.add(int(h))
+            train_entity_ids.add(int(t))
+            train_relation_ids.add(int(r))
+    with open(test_file, "r", encoding="utf-8") as fin:
+        for line in fin:
+            h, r, t = line.strip().split("\t")
+            train_entity_ids.add(int(h))
+            train_relation_ids.add(int(r))
     sentence = entity_sentences
     sentence.extend(relation_sentences)
     model = Word2Vec(sentences=sentence, size=vector_size, min_count=1)
@@ -51,16 +64,24 @@ def build_word2vec(entity_file: str, relation_file: str, vector_size: int=200):
         word2idx[id] = idx
         mean_vector = np.mean([model.wv[word] for word in sentence], axis=0)
         vectors.append(mean_vector)
+    for id in train_entity_ids:
+        if id not in entity_ids:
+            word2idx[id] = len(word2idx)
+            vectors.append(np.random.normal(0, 0.5, vector_size))
     vectors = np.stack(vectors)
     entity_embedding = {"word2idx": word2idx, "embedding": vectors}
     pickle.dump(entity_embedding, open("lab2/output/entity_emb.bin", "wb"))
 
-    word2idx = {"_UNK": 0}
-    vectors = [np.zeros(vector_size, dtype=np.float32)]
+    word2idx = {}
+    vectors = []
     for idx, (id, sentence) in enumerate(zip(relation_ids, relation_sentences)):
-        word2idx[id] = idx + 1
+        word2idx[id] = idx
         mean_vector = np.mean([model.wv[word] for word in sentence], axis=0)
         vectors.append(mean_vector)
+    for id in train_relation_ids:
+        if id not in entity_ids:
+            word2idx[id] = len(word2idx)
+            vectors.append(np.random.normal(0, 0.5, vector_size))
     vectors = np.stack(vectors)
     entity_embedding = {"word2idx": word2idx, "embedding": vectors}
     pickle.dump(entity_embedding, open("lab2/output/relation_emb.bin", "wb"))
