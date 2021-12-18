@@ -6,9 +6,9 @@ if __name__ == "__main__":
     config["data"] = {}
     config["data"]["entity_file"] = "lab2/data/entity_with_text.txt"
     config["data"]["relation_file"] = "lab2/data/relation_with_text.txt"
-    config["data"]["train_file"] = "lab2/data/cleaned_train.txt"
-    config["data"]["eval_file"] = "lab2/data/cleaned_dev.txt"
-    config["data"]["test_file"] = "lab2/data/cleaned_test.txt"
+    config["data"]["train_file"] = "lab2/data/train.txt"
+    config["data"]["eval_file"] = "lab2/data/dev.txt"
+    config["data"]["test_file"] = "lab2/data/test.txt"
 
     config["embedding"] = {}
     config["embedding"]["emb_dim"] = 200
@@ -16,8 +16,8 @@ if __name__ == "__main__":
     config["embedding"]["relation_embedding_path"] = "lab2/output/relation_emb.bin"
 
     config["model"] = {}
-    config["model"]["model_name"] = "TransE"
-    config["model"]["model_save_path"] = "lab2/output"
+    config["model"]["model_name"] = "TransH"
+    config["model"]["model_save_dir"] = "lab2/output"
 
     config["parameter"] = {}
     config["parameter"]["lr"] = 1
