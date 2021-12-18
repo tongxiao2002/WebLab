@@ -29,7 +29,7 @@ class FullTripletDataset(torch.utils.data.Dataset):
 class TestTripletDataset(torch.utils.data.Dataset):
     def __init__(self, datafile: str) -> None:
         super(TestTripletDataset, self).__init__()
-        self.twosome = {"h": [], "r": [], "t": []}
+        self.twosome = {"h": [], "r": []}
         self.twosome_num = 0
         with open(datafile, "r", encoding="utf-8") as fin:
             for line in fin:
