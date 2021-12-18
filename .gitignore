@@ -23,5 +23,12 @@ lab2/OpenKE/
 # log files
 lab2/logs
 
+# result files
+lab2/submit
+
 # cache dirs
 **/__pycache__/
+
+# zip files
+**/*.zip
+
