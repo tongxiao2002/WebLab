@@ -53,12 +53,11 @@ def train(config: dict, logger: logging.Logger):
     train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=config["parameter"]["batch_size"], shuffle=True)
     eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=config["parameter"]["batch_size"], shuffle=False)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=config["parameter"]["lr"], weight_decay=config["parameter"]["decay"])
+    optimizer = torch.optim.SGD(model.parameters(), lr=config["parameter"]["lr"], weight_decay=config["parameter"]["decay"])
     for epoch in range(config["parameter"]["epochs"]):
         tmp_step = 0
         total_loss = 0
         model.train()
-        labels = []
         model.normalize_embedding()
         for batch in tqdm.tqdm(train_loader):
             h = batch["h"].to(device)
@@ -80,12 +79,6 @@ def train(config: dict, logger: logging.Logger):
             model.normalize_embedding()
 
             tmp_step += 1
-            # results = model.predict((h, r))
-            # preds["hit@1"].extend(results["hit@1"])
-            # preds["hit@5"].extend(results["hit@5"])
-            # preds["hit@10"].extend(results["hit@10"])
-            labels.append(batch["t"].flatten().cpu())
-
             if tmp_step % 100 == 0:
                 logger.info("Epoch: {}, Step: {}, Loss: {:.4f}".format(epoch + 1, tmp_step, total_loss / 100))
                 total_loss = 0
@@ -114,7 +107,7 @@ def train(config: dict, logger: logging.Logger):
         hit_1_acc = hit_1_num / eval_num
         hit_5_acc = hit_5_num / eval_num
         hit_10_acc = hit_10_num / eval_num
-        syn_score = 0.3 * hit_1_acc + 0.7 * hit_5_acc    # 加权平均, hit@1 权值最高
+        syn_score = 0.3 * hit_1_acc + 0.7 * hit_5_acc    # 加权平均, hit@5 权值最高
         if syn_score > best_syn_score:
             best_syn_score = syn_score
             torch.save({"entity_word2idx": entity_pre_emb["word2idx"],
@@ -130,5 +123,6 @@ if __name__ == "__main__":
     config_file = "lab2/src/config.yaml"
     config = yaml.load(open(config_file, "r", encoding="utf-8"), Loader=yaml.FullLoader)
     logger = get_logger(config["log"]["log_dir"])
+    set_seed(config["parameter"]["seed"])
     train(config, logger)
     # build_word2vec(entity_file, relation_file)
