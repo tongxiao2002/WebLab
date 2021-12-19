@@ -25,6 +25,7 @@ if __name__ == "__main__":
     config["parameter"]["decay"] = 0
     config["parameter"]["batch_size"] = 256
     config["parameter"]["device"] = "cuda:0"
+    config["parameter"]["seed"] = 114514
 
     config["log"] = {}
     config["log"]["log_dir"] = "lab2/logs"
