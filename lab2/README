@@ -1,0 +1,85 @@
+# 运行环境
+
+编程语言: `Python 3.8.10 64-bit`
+
+所用第三方包如下:
+
+```python
+gensim==3.8.3
+numpy==1.21.2
+tqdm==4.62.0
+torch==1.9.0+cu111
+torchaudio==0.9.0
+torchvision==0.10.0+cu111
+```
+
+# 运行方式
+
+所有的配置信息已经写在了 `lab2/src/config.yaml` 中，同时程序的运行也是依赖于该配置文件. `TransE` 和 `TransH` 模型的选择也可以在配置文件中更改。
+
+运行方式为在 `lab2` 文件夹的上一级执行命令:
+
+```shell
+$ python3 lab2/src/train.py             # 训练指令
+$ python3 lab2/src/predict.py           # 测试指令
+```
+
+之所以需要在 `lab2` 文件夹的上一级执行以上指令，是因为我在写代码的时候使用 `VSCode` 将工作目录设置在了 `lab2` 文件夹的上一级，因此 `lab2/src/config.yaml` 配置文件中指定的所有文件路径都是以 `lab2` 文件夹的上一级作为起始目录，否则需要改动配置文件。
+
+如果还是不知道怎么办的话，可以参考 [GitHub](https://github.com/TownShaw/WebLab) 的文件结构，直接在根目录下执行就完事了。
+
+# 关键函数说明
+
+# config.yaml
+
+控制所有程序文件运行的配置文件.
+
+## train.py
+
+该文件用于训练模型.
+
+- `train()`: 用于调用其他所有模块训练模型.
+
+## dataloader.py
+
+该文件用于载入数据集.
+
+- `FullTripletDataset`: 该类用于载入具有完整三元组的数据集, 比如 `train.txt` 和 `dev.txt`. 输入的参数为数据文件的路径.
+
+- `TestTripletDataset`: 该类用于载入只有头实体和关系的测试数据集, 比如 `test.txt`. 输入的参数为测试数据文件的路径.
+
+## model.py
+
+该文件用于实现 `TransE` 和 `TransH` 模型.
+
+- `TransE`: 该类为 `TransE` 模型的具体实现:
+
+  - `predict()`: 该函数用于预测, 输入头实体和关系会得到 `Hit@1, Hit@5, Hit@10`.
+
+  - `normalize_embedding()`: 该函数用于每训练一个 `batch` 之后对 `Entity Embedding` 进行归一化.
+
+- `TransH`: 该类为 `TransH` 模型的具体实现:
+  - `predict()`: 该函数用于预测, 输入头实体和关系会得到 `Hit@1, Hit@5, Hit@10`.
+  - `normalize_embedding()`: 该函数用于每训练一个 `batch` 之后对 `Entity Embedding` 和 `Norm Embedding` 进行归一化.
+
+- `MarginLoss`: 该类为针对 `TransE` 的 `Loss` 函数实现.
+
+  其实可以直接在 `TransE.forward()` 中计算完成, 但是刚开始是这么写的也懒得改了:laughing:，但是 `TransH` 的 `Loss` 是在 `TransH.forward()` 中完成的，所以在 `train.py` 的计算 `Loss` 的部分你会发现写的很奇怪:rofl:.
+
+# predict.py
+- `predict()`: 使用 `config.yaml` 文件中指定的模型来预测 `test.txt` 的结果.
+
+# utils/utils.py
+
+该文件用于实现一些各种各样的功能函数.
+
+- `get_logger()`: 得到 `logger`，用于记录训练过程.
+- `build_word2vec`: 从 `entity_with_text.txt` 和 `relation_with_text.txt` 中获得表征每个实体和关系的向量.
+- `set_seed()`: 设置 `torch` 的随机数种子，默认为 `114514`.
+- `collate_fn()`: 写完了之后发现没用:clown_face::clown_face::clown_face:，因为 `torch` 默认对字典列表的处理就是这个函数里面实现的.
+
+# utils/gen_config.py
+
+- 用于生成配置文件 `config.yaml`，但是也可以直接改配置文件，所以还是没用:clown_face::clown_face::clown_face:.
+
+# 注: `submit/result.txt` 文件由 `TransH` 模型预测而得
