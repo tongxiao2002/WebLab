@@ -1,12 +1,11 @@
 import os
-from gensim import models
 import yaml
 import tqdm
 import torch
 import pickle
 import torch.utils.data
 from model import TransH, TransE, MarginLoss
-from dataloader import FullTripletDataset, TestTripletDataset
+from dataloader import FullTripletDataset
 from utils.utils import *
 
 
@@ -122,7 +121,7 @@ def train(config: dict, logger: logging.Logger):
 if __name__ == "__main__":
     config_file = "lab2/src/config.yaml"
     config = yaml.load(open(config_file, "r", encoding="utf-8"), Loader=yaml.FullLoader)
-    logger = get_logger(config["log"]["log_dir"])
+    logger = get_logger(config)
     set_seed(config["parameter"]["seed"])
     train(config, logger)
     # build_word2vec(entity_file, relation_file)

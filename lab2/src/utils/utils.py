@@ -7,13 +7,15 @@ from gensim.models import Word2Vec
 import torch
 
 
-def get_logger(log_dir) -> logging.Logger:
-    if not os.path.isdir(log_dir):
-        os.mkdir(log_dir)
+def get_logger(config) -> logging.Logger:
+    if not os.path.isdir(config["log"]["log_dir"]):
+        os.mkdir(config["log"]["log_dir"])
     logger = logging.getLogger(name="TransE")
     logger.setLevel(logging.INFO)
     now = datetime.now()
-    filehandler = logging.FileHandler(filename=os.path.join(log_dir, "TransE_{}.log".format(now.strftime("%Y-%m-%d_%H:%M:%S"))), encoding="utf-8", mode="w")
+    filehandler = logging.FileHandler(filename=os.path.join(config["log"]["log_dir"],
+                                                            "{}_{}.log".format(config["model"]["model_name"],
+                                                                               now.strftime("%Y-%m-%d_%H:%M:%S"))),encoding="utf-8", mode="w")
     filehandler.setLevel(logging.INFO)
     formatter = logging.Formatter(fmt="%(asctime)s - %(filename)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
     filehandler.setFormatter(formatter)
@@ -25,7 +27,7 @@ def get_logger(log_dir) -> logging.Logger:
     return logger
 
 
-def set_seed(seed: int):
+def set_seed(seed: int=114514):
     torch.manual_seed(seed)
 
 
