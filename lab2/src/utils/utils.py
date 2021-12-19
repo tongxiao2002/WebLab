@@ -25,6 +25,10 @@ def get_logger(log_dir) -> logging.Logger:
     return logger
 
 
+def set_seed(seed: int):
+    torch.manual_seed(seed)
+
+
 def build_word2vec(entity_file: str, relation_file: str, train_file: str, test_file: str, vector_size: int=200):
     entity_ids = []
     entity_sentences = []
