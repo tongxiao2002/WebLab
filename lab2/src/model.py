@@ -117,6 +117,8 @@ class TransH(torch.nn.Module):
         else:
             torch.nn.init.xavier_normal_(self.entity_embedding.weight.data)
             torch.nn.init.xavier_normal_(self.relation_embedding.weight.data)
+        self.relation_embedding.weight.data = F.normalize(self.relation_embedding.weight.data, 2, -1)
+        self.norm_embedding.weight.data = F.normalize(self.norm_embedding.weight.data, 2, -1)
         self.entity_idx2word = {}
         for k, v in self.entity_word2idx.items():
             self.entity_idx2word[v] = k
